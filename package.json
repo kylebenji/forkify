@@ -17,5 +17,14 @@
     "core-js": "^3.30.1",
     "fractional": "^1.0.0",
     "regenerator-runtime": "^0.13.11"
-  }
+  },
+  "default": "index.html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kylebenji/forkify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kylebenji/forkify/issues"
+  },
+  "homepage": "https://github.com/kylebenji/forkify#readme"
 }

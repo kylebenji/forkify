@@ -1,6 +1,17 @@
+## About
+
+    - Forkify app created as a part of Javascript course by Jonas Schmedtmann on Udemy
+    - Main CSS and HTML written by Jonas, all Javascript written by me.
+    - Application allows a user to search one of a specific set of search words https://forkify-api.herokuapp.com/phrases.html to get recipes to cook
+    - recipes include ingredients, a picture, and a link to the ful directions
+    - Further functionality includes the ability to upload your own recipes to the app that are then searchable, bookmarking recipes to add them to a bookmarks menu which is saved across page reloads, and the ability to adjust the servings in a recipe, which then changes the respective quantities of ingredients for the recipe.
+    - Fun features that I had not put together bfore: pagination of the search results, search functionality, modularized code. Also uses Parcel, which I had not used before.
+
 ### TODO
 
     - reset upload page so you can upload more than one recipe before reloading page
+    - make ability to delete created recipes (this would be helpful since I have a ton that I used for testing too)
+      - see documentation for this https://forkify-api.herokuapp.com/v2
 
 ### Features and Improvements
 
