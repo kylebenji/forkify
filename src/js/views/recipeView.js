@@ -1,21 +1,23 @@
-import View from './View';
+import View from "./View";
 
-import icons from 'url:../../img/icons.svg'; // ensuring we are using the right icon paths
-import Fraction from 'fractional';
+import icons from "url:../../img/icons.svg"; // ensuring we are using the right icon paths
+import Fraction from "fractional";
 
 class RecipeView extends View {
-  _parentElement = document.querySelector('.recipe');
+  _parentElement = document.querySelector(".recipe");
 
-  _errorMessage = 'We could not find that recipe, please try another one!';
-  _message;
+  _errorMessage = "We could not find that recipe, please try another one!";
+  _message = "Start by searching for a recipe or an ingredient. Have fun!";
 
   addHandlerRender(handler) {
-    ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
+    ["hashchange", "load"].forEach((ev) =>
+      window.addEventListener(ev, handler)
+    );
   }
 
   addHandlerServings(handler) {
-    this._parentElement.addEventListener('click', e => {
-      const btn = e.target.closest('.btn--update-servings');
+    this._parentElement.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn--update-servings");
       if (!btn) return;
       const newServings = +btn.dataset.updateTo;
       if (newServings < 1) return;
@@ -24,16 +26,22 @@ class RecipeView extends View {
   }
 
   addHandlerBookmark(handler) {
-    this._parentElement.addEventListener('click', e => {
-      const btn = e.target.closest('.btn--bookmark');
+    this._parentElement.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn--bookmark");
       if (!btn) return;
-      console.log(btn);
+      handler();
+    });
+  }
+
+  addHandlerDelete(handler) {
+    this._parentElement.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn--delete");
+      if (!btn) return;
       handler();
     });
   }
 
   _generateMarkup() {
-    console.log(this._data);
     return `
     <figure class="recipe__fig">
       <img src="${this._data.image}" alt="${
@@ -81,16 +89,22 @@ class RecipeView extends View {
         </div>
       </div>
 
-      <div class="recipe__user-generated${this._data.key ? '' : ' hidden'}">
+      <div class="recipe__user-generated${this._data.key ? "" : " hidden"}">
         <svg>
           <use href="${icons}#icon-user"></use>
         </svg>
       </div>
+      
       <button class="btn--round btn--bookmark">
         <svg class="">
           <use href="${icons}#icon-bookmark${
-      this._data.bookmarked ? '-fill' : ''
+      this._data.bookmarked ? "-fill" : ""
     }"></use>
+        </svg>
+      </button>
+      <button class="btn--round btn--delete${this._data.key ? "" : " hidden"}">
+        <svg>
+          <use href="${icons}#icon-delete"></use>
         </svg>
       </button>
     </div>
@@ -98,7 +112,7 @@ class RecipeView extends View {
     <div class="recipe__ingredients">
       <h2 class="heading--2">Recipe ingredients</h2>
       <ul class="recipe__ingredient-list">
-        ${this._data.ingredients?.map(this._generateMarkupIngredient).join('')}
+        ${this._data.ingredients?.map(this._generateMarkupIngredient).join("")}
       </ul>
     </div>
 
@@ -130,7 +144,7 @@ class RecipeView extends View {
     <use href="${icons}#icon-check"></use>
   </svg>
   <div class="recipe__quantity">${
-    ingredient.quantity ? new Fraction.Fraction(ingredient.quantity) : ''
+    ingredient.quantity ? new Fraction.Fraction(ingredient.quantity) : ""
   }</div>
   <div class="recipe__description">
     <span class="recipe__unit">${ingredient.unit}</span>

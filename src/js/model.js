@@ -1,11 +1,11 @@
-import { async } from 'regenerator-runtime';
-import { API_URL, RESULTS_PER_PAGE, API_KEY } from './config.js';
-import { AJAX } from './helpers.js';
+import { async } from "regenerator-runtime";
+import { API_URL, RESULTS_PER_PAGE, API_KEY } from "./config.js";
+import { AJAX } from "./helpers.js";
 
 export const state = {
   recipe: {},
   search: {
-    query: '',
+    query: "",
     results: [],
     resultsPerPage: RESULTS_PER_PAGE,
     resultsPage: 1,
@@ -34,7 +34,7 @@ export const loadRecipe = async function (id) {
 
     state.recipe = createRecipeObject(data);
 
-    if (state.bookmarks.some(bookmark => bookmark.id === id))
+    if (state.bookmarks.some((bookmark) => bookmark.id === id))
       state.recipe.bookmarked = true;
   } catch (error) {
     throw error;
@@ -45,9 +45,8 @@ export const getSearchResults = async function (query) {
   try {
     state.search.query = query;
     const data = await AJAX(`${API_URL}?search=${query}&key=${API_KEY}`);
-    // console.log(data);
 
-    state.search.results = data.data.recipes.map(recipe => {
+    state.search.results = data.data.recipes.map((recipe) => {
       return {
         id: recipe.id,
         title: recipe.title,
@@ -56,8 +55,6 @@ export const getSearchResults = async function (query) {
         ...(recipe.key && { key: recipe.key }),
       };
     });
-
-    // console.log(state.search);
   } catch (error) {
     console.error(error);
     throw error;
@@ -72,14 +69,14 @@ export const getSearchResultsPage = function (page = state.search.resultsPage) {
 };
 
 export const updateServings = function (newServings) {
-  state.recipe.ingredients.forEach(ing => {
+  state.recipe.ingredients.forEach((ing) => {
     ing.quantity = (ing.quantity * newServings) / state.recipe.servings;
   });
   state.recipe.servings = newServings;
 };
 
 const persistBookmarks = function () {
-  localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+  localStorage.setItem("bookmarks", JSON.stringify(state.bookmarks));
 };
 
 export const addBookmark = function (recipe) {
@@ -95,7 +92,7 @@ export const addBookmark = function (recipe) {
 
 export const removeBookmark = function (id) {
   //remove bookmark from list
-  const index = state.bookmarks.findIndex(el => el.id === id);
+  const index = state.bookmarks.findIndex((el) => el.id === id);
   state.bookmarks.splice(index, 1);
 
   //remove current recipe as bookmark
@@ -106,26 +103,30 @@ export const removeBookmark = function (id) {
 };
 
 const init = function () {
-  const storage = localStorage.getItem('bookmarks');
+  const storage = localStorage.getItem("bookmarks");
   if (storage) state.bookmarks = JSON.parse(storage);
 };
 init();
 
 const clearBookmarks = function () {
-  localStorage.clear('bookmarks');
+  localStorage.clear("bookmarks");
 };
 
+/**
+ * Upload a new recipe to the forkify API using developer key
+ * @param {Object} newRecipe the recipe object to be sent
+ */
 export const uploadRecipe = async function (newRecipe) {
   try {
     const ingredients = Object.entries(newRecipe)
-      .filter(entry => {
-        return entry[0].startsWith('ingredient') && entry[1] !== '';
+      .filter((entry) => {
+        return entry[0].startsWith("ingredient") && entry[1] !== "";
       })
-      .map(ing => {
-        const ingArr = ing[1].split(',').map(el => el.trim());
+      .map((ing) => {
+        const ingArr = ing[1].split(",").map((el) => el.trim());
 
         if (ingArr.length !== 3)
-          throw new Error('Wrong ingredient format, please use given format.');
+          throw new Error("Wrong ingredient format, please use given format.");
 
         const [quantity, unit, description] = ingArr;
         return { quantity: quantity ? +quantity : null, unit, description };
@@ -144,11 +145,21 @@ export const uploadRecipe = async function (newRecipe) {
     const data = await AJAX(`${API_URL}?key=${API_KEY}`, recipe);
     state.recipe = createRecipeObject(data);
 
-    console.log(data);
-    console.log(state.recipe);
-
     addBookmark(state.recipe);
   } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteRecipe = async function (recipeId) {
+  try {
+    const data = await AJAX(
+      `${API_URL}${recipeId}?key=${API_KEY}`,
+      undefined,
+      true
+    );
+  } catch (error) {
+    console.error(error);
     throw error;
   }
 };

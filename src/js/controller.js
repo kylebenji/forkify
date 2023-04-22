@@ -1,14 +1,15 @@
-import * as model from './model.js';
-import { MODAL_CLOSE_SEC } from './config.js';
-import recipeView from './views/recipeView.js';
-import searchView from './views/searchView.js';
-import resultsView from './views/resultsView.js';
-import bookmarksView from './views/bookmarksView.js';
-import paginationView from './views/paginationView.js';
-import addRecipeView from './views/addRecipeView.js';
+import * as model from "./model.js";
+import { MODAL_CLOSE_SEC } from "./config.js";
+import recipeView from "./views/recipeView.js";
+import searchView from "./views/searchView.js";
+import resultsView from "./views/resultsView.js";
+import bookmarksView from "./views/bookmarksView.js";
+import paginationView from "./views/paginationView.js";
+import addRecipeView from "./views/addRecipeView.js";
+import confirmationModalView from "./views/confirmationModalView.js";
 
-import 'core-js/stable'; //polyfill
-import 'regenerator-runtime/runtime'; //polyfill
+import "core-js/stable"; //polyfill
+import "regenerator-runtime/runtime"; //polyfill
 
 // https://forkify-api.herokuapp.com/v2
 
@@ -101,7 +102,6 @@ const controlAddRecipe = async function (newRecipe) {
     //upload recipe data to API
     await model.uploadRecipe(newRecipe);
 
-    console.log(model.state.recipe);
     //render recipe
     recipeView.render(model.state.recipe);
 
@@ -112,15 +112,61 @@ const controlAddRecipe = async function (newRecipe) {
     bookmarksView.render(model.state.bookmarks);
 
     //change ID in url
-    window.history.pushState(null, '', `#${model.state.recipe.id}`);
+    window.history.pushState(null, "", `#${model.state.recipe.id}`);
 
     //autoclose modal
     setTimeout(function () {
-      addRecipeView.toggleWindow();
+      addRecipeView.closeWindow();
+      //reset form after window closes
+      setTimeout(function () {
+        addRecipeView.resetHTML();
+      }, 1000);
     }, MODAL_CLOSE_SEC * 1000);
   } catch (error) {
-    console.log(error);
     addRecipeView.renderError(error);
+  }
+};
+
+const controlDeleteRecipeModal = async function () {
+  try {
+    //render confirmation window
+    confirmationModalView.openWindow();
+  } catch (error) {
+    recipeView.renderError(error);
+  }
+};
+
+const controlDeleteRecipe = async function () {
+  try {
+    //get recipe ID
+    const recipeId = window.location.hash.slice(1);
+    //render spinner in modal
+    confirmationModalView.renderSpinner();
+    //send to delete API
+    await model.deleteRecipe(recipeId);
+    //show success or failure message
+    confirmationModalView.renderMessage();
+    //remove recipe hash from url
+    window.history.pushState(null, "", window.location.pathname);
+    //remove recipe from search results
+    model.state.search.results.splice(
+      model.state.search.results.findIndex((el) => el.id === recipeId),
+      1
+    );
+    //reload search results without the recipe
+    loadSearchResults(model.state.search.resultsPage);
+    setTimeout(function () {
+      //hide success message, close modal
+      confirmationModalView.closeWindow();
+      //reset recipe window to initial message
+      recipeView.renderMessage();
+      //reset modal after close
+      setTimeout(function () {
+        confirmationModalView.resetHTML();
+      }, 1000);
+    }, MODAL_CLOSE_SEC * 1000);
+  } catch (error) {
+    recipeView.renderError(error);
   }
 };
 
@@ -129,6 +175,8 @@ const init = function () {
   recipeView.addHandlerRender(controlRecipes);
   recipeView.addHandlerServings(controlServings);
   recipeView.addHandlerBookmark(controlBookmark);
+  recipeView.addHandlerDelete(controlDeleteRecipeModal);
+  confirmationModalView.addHandlerDelete(controlDeleteRecipe);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
   addRecipeView.addHandlerUpload(controlAddRecipe);
